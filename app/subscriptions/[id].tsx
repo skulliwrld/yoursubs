@@ -1,6 +1,13 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { HOME_SUBSCRIPTIONS } from "../../constants/data";
+import dayjs from "dayjs";
+
+const getCompanyInitial = (id: string, name: string): string => {
+  if (name) return name.charAt(0).toUpperCase();
+  const parts = id.split("-");
+  return parts[0].charAt(0).toUpperCase();
+};
 
 export default function SubscriptionDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -36,11 +43,11 @@ export default function SubscriptionDetailScreen() {
           <View className="sub-head">
             <View className="sub-main">
               <View 
-                className="sub-icon items-center justify-center rounded-lg"
+                className="w-14 h-14 rounded-lg items-center justify-center"
                 style={{ backgroundColor: subscription.color }}
               >
                 <Text className="text-white font-sans-bold text-2xl">
-                  {subscription.name.charAt(0)}
+                  {getCompanyInitial(subscription.id, subscription.name)}
                 </Text>
               </View>
               <View className="sub-copy">
@@ -80,7 +87,7 @@ export default function SubscriptionDetailScreen() {
               <View className="sub-row-copy">
                 <Text className="sub-label">Next Payment</Text>
                 <Text className="sub-value">
-                  {new Date(subscription.renewalDate).toLocaleDateString()}
+                  {dayjs(subscription.renewalDate).format("MMM D, YYYY")}
                 </Text>
               </View>
             </View>
@@ -96,7 +103,7 @@ export default function SubscriptionDetailScreen() {
               <View className="sub-row-copy">
                 <Text className="sub-label">Start Date</Text>
                 <Text className="sub-value">
-                  {new Date(subscription.startDate).toLocaleDateString()}
+                  {dayjs(subscription.startDate).format("MMM D, YYYY")}
                 </Text>
               </View>
             </View>
@@ -150,7 +157,7 @@ export default function SubscriptionDetailScreen() {
                 <View className="sub-row-copy">
                   <Text className="sub-label">Last Used</Text>
                   <Text className="sub-value">
-                    {new Date(subscription.usageStats.lastUsed).toLocaleDateString()}
+                    {dayjs(subscription.usageStats.lastUsed).format("MMM D, YYYY")}
                   </Text>
                 </View>
               </View>

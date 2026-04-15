@@ -1,6 +1,20 @@
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useAuth, useUser } from "@clerk/expo";
+import { useRouter } from "expo-router";
 
 export default function SettingsScreen() {
+  const { user } = useUser();
+  const { signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <ScrollView className="flex-1 bg-background px-5 pt-12 pb-24">
       <View className="mb-6">
@@ -16,25 +30,29 @@ export default function SettingsScreen() {
           Profile
         </Text>
         
-        <View className="sub-card mb-3">
+        <TouchableOpacity className="sub-card mb-3" onPress={() => router.push("/profile")}>
           <View className="sub-row">
             <View className="sub-row-copy">
               <View className="home-avatar bg-muted items-center justify-center">
-                <Text className="text-2xl font-sans-bold text-foreground">AD</Text>
+                <Text className="text-2xl font-sans-bold text-foreground">
+                  {user?.firstName?.charAt(0) || "U"}
+                </Text>
               </View>
               <View className="ml-4">
-                <Text className="sub-title">Adrian | JS Mastery</Text>
-                <Text className="sub-meta">adrian@jsmastery.com</Text>
+                <Text className="sub-title">
+                  {user?.fullName || "User"}
+                </Text>
+                <Text className="sub-meta">
+                  {user?.primaryEmailAddress?.emailAddress || "No email"}
+                </Text>
               </View>
             </View>
-            <TouchableOpacity className="bg-muted rounded-full p-2">
-              <Text className="text-accent font-sans-bold">→</Text>
-            </TouchableOpacity>
+            <Text className="text-accent font-sans-bold">→</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Account Settings */}
+{/* Account Settings */}
       <View className="mb-6">
         <Text className="text-lg font-sans-semibold text-foreground mb-3">
           Account
@@ -220,7 +238,7 @@ export default function SettingsScreen() {
       </View>
 
       {/* Sign Out Button */}
-      <TouchableOpacity className="sub-cancel mb-8">
+      <TouchableOpacity className="sub-cancel mb-8" onPress={handleSignOut}>
         <Text className="sub-cancel-text text-center">Sign Out</Text>
       </TouchableOpacity>
     </ScrollView>

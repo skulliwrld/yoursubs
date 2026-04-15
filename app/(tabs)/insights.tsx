@@ -1,9 +1,17 @@
 import { ScrollView, Text, View } from "react-native";
 import { HOME_SUBSCRIPTIONS } from "../../constants/data";
+import dayjs from "dayjs";
+
+const getCompanyInitial = (id: string, name: string): string => {
+  if (name) return name.charAt(0).toUpperCase();
+  const parts = id.split("-");
+  return parts[0].charAt(0).toUpperCase();
+};
 
 export default function InsightsScreen() {
   const totalSpending = HOME_SUBSCRIPTIONS.reduce((sum, sub) => sum + sub.price, 0);
   const activeSubscriptions = HOME_SUBSCRIPTIONS.filter(sub => sub.status === "active").length;
+  const nextRenewal = dayjs(Math.min(...HOME_SUBSCRIPTIONS.map(s => dayjs(s.renewalDate).valueOf()))).format("MMM D, YYYY");
 
   return (
     <ScrollView className="flex-1 bg-background px-5 pt-12 pb-24">
@@ -61,11 +69,11 @@ export default function InsightsScreen() {
             <View className="sub-row">
               <View className="sub-row-copy">
                 <View 
-                  className="sub-icon items-center justify-center rounded-lg"
+                  className="w-12 h-12 rounded-lg items-center justify-center"
                   style={{ backgroundColor: sub.color }}
                 >
                   <Text className="text-white font-sans-bold text-lg">
-                    {sub.name.charAt(0)}
+                    {getCompanyInitial(sub.id, sub.name)}
                   </Text>
                 </View>
                 <View>
@@ -148,7 +156,7 @@ export default function InsightsScreen() {
               <View className="sub-row-copy">
                 <Text className="sub-label">Next Renewal</Text>
                 <Text className="sub-value">
-                  {new Date(Math.min(...HOME_SUBSCRIPTIONS.map(s => new Date(s.renewalDate).getTime()))).toLocaleDateString()}
+                  {nextRenewal}
                 </Text>
               </View>
             </View>

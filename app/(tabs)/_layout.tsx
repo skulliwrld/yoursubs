@@ -1,10 +1,17 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { Image } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "@clerk/expo";
 import { tabs } from "../../constants/data";
 import "../../global.css";
 
 export default function TabsLayout() {
+  const { isSignedIn } = useAuth();
+
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>

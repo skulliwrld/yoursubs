@@ -1,6 +1,13 @@
 import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { HOME_SUBSCRIPTIONS } from "../../constants/data";
+import dayjs from "dayjs";
+
+export const getCompanyInitial = (id: string, name: string): string => {
+  if (name) return name.charAt(0).toUpperCase();
+  const parts = id.split("-");
+  return parts[0].charAt(0).toUpperCase();
+};
 
 export default function SubscriptionsScreen() {
   const activeSubscriptions = HOME_SUBSCRIPTIONS.filter(sub => sub.status === "active");
@@ -40,11 +47,11 @@ export default function SubscriptionsScreen() {
             <View className="sub-head">
               <View className="sub-main">
                 <View 
-                  className="sub-icon items-center justify-center rounded-lg"
+                  className="w-12 h-12 rounded-lg items-center justify-center"
                   style={{ backgroundColor: sub.color }}
                 >
-                  <Text className="text-white font-sans-bold text-2xl">
-                    {sub.name.charAt(0)}
+                  <Text className="text-white font-sans-bold text-xl">
+                    {getCompanyInitial(sub.id, sub.name)}
                   </Text>
                 </View>
                 <View className="sub-copy">
@@ -74,9 +81,9 @@ export default function SubscriptionsScreen() {
                  <View className="sub-row">
                    <View className="sub-row-copy">
                      <Text className="sub-label">Next Payment</Text>
-                     <Text className="sub-value">
-                       {new Date(sub.renewalDate).toLocaleDateString()}
-                     </Text>
+<Text className="sub-value">
+                        {dayjs(sub.renewalDate).format("MMM D, YYYY")}
+                      </Text>
                    </View>
                  </View>
                 <View className="sub-row">
@@ -112,13 +119,13 @@ export default function SubscriptionsScreen() {
               <View className="sub-head">
                 <View className="sub-main">
                   <View 
-                    className="sub-icon items-center justify-center rounded-lg"
-                    style={{ backgroundColor: sub.color }}
-                  >
-                    <Text className="text-white font-sans-bold text-2xl">
-                      {sub.name.charAt(0)}
-                    </Text>
-                  </View>
+                  className="w-12 h-12 rounded-lg items-center justify-center"
+                  style={{ backgroundColor: sub.color }}
+                >
+                  <Text className="text-white font-sans-bold text-xl">
+                    {getCompanyInitial(sub.id, sub.name)}
+                  </Text>
+                </View>
                   <View className="sub-copy">
                     <Text className="sub-title">{sub.name}</Text>
                     <Text className="sub-meta">{sub.plan}</Text>
