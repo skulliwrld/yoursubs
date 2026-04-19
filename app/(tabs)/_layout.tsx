@@ -2,11 +2,15 @@ import { Tabs, Redirect } from "expo-router";
 import { Image } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@clerk/expo";
+import { FullScreenLoader } from "@/components/auth/auth-ui";
 import { tabs } from "../../constants/data";
-import "../../global.css";
 
 export default function TabsLayout() {
-  const { isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return <FullScreenLoader />;
+  }
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;

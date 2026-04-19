@@ -1,7 +1,7 @@
+import dayjs from "dayjs";
 import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { HOME_SUBSCRIPTIONS } from "../../constants/data";
-import dayjs from "dayjs";
 
 export const getCompanyInitial = (id: string, name: string): string => {
   if (name) return name.charAt(0).toUpperCase();
