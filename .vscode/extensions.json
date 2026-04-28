@@ -2,6 +2,7 @@
     "recommendations": [
         "expo.vscode-expo-tools",
         "kilocode.kilo-code",
-        "openai.chatgpt"
+        "openai.chatgpt",
+        "continue.continue"
     ]
 }

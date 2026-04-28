@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { HOME_SUBSCRIPTIONS } from "../../constants/data";
+import { getHomeSubscriptions } from "../../constants/data";
+import { useCallback, useState } from "react";
+import { Subscription } from "../../constants/types";
 
 export const getCompanyInitial = (id: string, name: string): string => {
   if (name) return name.charAt(0).toUpperCase();
@@ -10,8 +12,35 @@ export const getCompanyInitial = (id: string, name: string): string => {
 };
 
 export default function SubscriptionsScreen() {
-  const activeSubscriptions = HOME_SUBSCRIPTIONS.filter(sub => sub.status === "active");
-  const inactiveSubscriptions = HOME_SUBSCRIPTIONS.filter(sub => sub.status !== "active");
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadSubscriptions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const subs = await getHomeSubscriptions();
+      setSubscriptions(subs);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSubscriptions();
+    }, [loadSubscriptions])
+  );
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background justify-center items-center">
+        <Text className="text-muted-foreground">Loading subscriptions...</Text>
+      </View>
+    );
+  }
+
+  const activeSubscriptions = subscriptions.filter(sub => sub.status === "active");
+  const inactiveSubscriptions = subscriptions.filter(sub => sub.status !== "active");
 
   const handleSubscriptionPress = (id: string) => {
     router.push({
@@ -60,7 +89,7 @@ export default function SubscriptionsScreen() {
                 </View>
               </View>
               <View className="sub-price-box">
-                <Text className="sub-price">${sub.price.toFixed(2)}</Text>
+                <Text className="sub-price">NGN {sub.price.toFixed(2)}</Text>
                 <Text className="sub-billing">{sub.billing}</Text>
               </View>
             </View>
@@ -132,7 +161,7 @@ export default function SubscriptionsScreen() {
                   </View>
                 </View>
                 <View className="sub-price-box">
-                  <Text className="sub-price">${sub.price.toFixed(2)}</Text>
+                  <Text className="sub-price">NGN {sub.price.toFixed(2)}</Text>
                   <Text className="sub-billing">{sub.billing}</Text>
                 </View>
               </View>
@@ -160,7 +189,7 @@ export default function SubscriptionsScreen() {
       )}
 
       {/* Empty State */}
-      {HOME_SUBSCRIPTIONS.length === 0 && (
+      {subscriptions.length === 0 && (
         <View className="home-empty-state">
           <Text className="text-center text-muted-foreground">
             No subscriptions found. Add your first subscription to get started.

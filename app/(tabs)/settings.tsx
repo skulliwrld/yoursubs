@@ -149,7 +149,7 @@ export default function SettingsScreen() {
               </View>
               <View>
                 <Text className="sub-title">Currency</Text>
-                <Text className="sub-meta">USD ($)</Text>
+                <Text className="sub-meta">NGN (₦)</Text>
               </View>
             </View>
             <Text className="text-accent font-sans-bold">→</Text>

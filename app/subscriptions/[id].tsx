@@ -1,7 +1,10 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { HOME_SUBSCRIPTIONS } from "../../constants/data";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { getHomeSubscriptions } from "../../constants/data";
 import dayjs from "dayjs";
+import { useCallback, useState } from "react";
+import { Subscription } from "../../constants/types";
+import { deleteSubscription } from "../../utils/storage";
 
 const getCompanyInitial = (id: string, name: string): string => {
   if (name) return name.charAt(0).toUpperCase();
@@ -11,7 +14,80 @@ const getCompanyInitial = (id: string, name: string): string => {
 
 export default function SubscriptionDetailScreen() {
   const { id } = useLocalSearchParams();
-  const subscription = HOME_SUBSCRIPTIONS.find(sub => sub.id === id);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const loadSubscriptions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const subs = await getHomeSubscriptions();
+      setSubscriptions(subs);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSubscriptions();
+    }, [loadSubscriptions])
+  );
+
+  const subscription = subscriptions.find(sub => sub.id === id as string);
+
+  const handleManageSubscription = () => {
+    if (!subscription) {
+      return;
+    }
+
+    router.push({
+      pathname: "/add-subscription",
+      params: { id: subscription.id },
+    });
+  };
+
+  const handleDeleteSubscription = () => {
+    if (!subscription || isDeleting) {
+      return;
+    }
+
+    Alert.alert(
+      "Cancel subscription?",
+      `This will remove ${subscription.name} from your saved subscriptions.`,
+      [
+        {
+          text: "Keep",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsDeleting(true);
+              await deleteSubscription(subscription.id);
+              Alert.alert("Deleted", "Subscription removed successfully.");
+              router.replace("/(tabs)/subscriptions");
+            } catch (error) {
+              console.error("Error deleting subscription:", error);
+              Alert.alert("Delete failed", "We couldn't remove this subscription. Please try again.");
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background justify-center items-center">
+        <Text className="text-muted-foreground">Loading subscription...</Text>
+      </View>
+    );
+  }
 
   if (!subscription) {
     return (
@@ -56,7 +132,7 @@ export default function SubscriptionDetailScreen() {
               </View>
             </View>
             <View className="sub-price-box">
-              <Text className="sub-price">${subscription.price.toFixed(2)}</Text>
+              <Text className="sub-price">NGN {subscription.price.toFixed(2)}</Text>
               <Text className="sub-billing">{subscription.billing}</Text>
             </View>
           </View>
@@ -124,7 +200,7 @@ export default function SubscriptionDetailScreen() {
         </Text>
         
         <View className="flex-col gap-3">
-          <TouchableOpacity className="bg-primary rounded-2xl p-4 items-center">
+          <TouchableOpacity className="bg-primary rounded-2xl p-4 items-center" onPress={handleManageSubscription}>
             <Text className="text-white font-sans-bold">Manage Subscription</Text>
           </TouchableOpacity>
           
@@ -132,8 +208,14 @@ export default function SubscriptionDetailScreen() {
             <Text className="text-white font-sans-bold">View Payment History</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-destructive rounded-2xl p-4 items-center">
-            <Text className="text-white font-sans-bold">Cancel Subscription</Text>
+          <TouchableOpacity
+            className="bg-destructive rounded-2xl p-4 items-center"
+            onPress={handleDeleteSubscription}
+            disabled={isDeleting}
+          >
+            <Text className="text-white font-sans-bold">
+              {isDeleting ? "Removing..." : "Cancel Subscription"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
